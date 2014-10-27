@@ -34,7 +34,7 @@ function! s:rasm.re()
         return s:always_fail
     endif
 
-    let trie= s:build_trie(self.__patterns)
+    let trie= s:build_trie(map(copy(self.__patterns), 'regexp_assemble#lex(v:val)'))
     return s:assemble(trie)
 endfunction
 
@@ -180,18 +180,17 @@ function! s:build_trie(texts, ...)
     for group in groups
         if len(group) == 1
             let trie.children+= [{
-            \   'prefix': group[0],
+            \   'prefix': join(group[0], ''),
             \   'is_leaf': 1,
             \   'children': [],
             \}]
         else
-            let prefix= s:S.common_head(group)
-            let plen= strlen(prefix)
+            let prefix= s:common_head(group)
 
             let trie.children+= [{
-            \   'prefix': prefix,
+            \   'prefix': join(prefix, ''),
             \   'is_leaf': 0,
-            \   'children': s:build_trie(map(copy(group), 'strpart(v:val, plen)'), 1),
+            \   'children': s:build_trie(filter(map(copy(group), 'v:val[len(prefix) : ]'), '!empty(v:val)'), 1),
             \}]
         endif
     endfor
@@ -203,6 +202,26 @@ function! s:build_trie(texts, ...)
     endif
 endfunction
 
+function! s:common_head(texts)
+    if empty(a:texts)
+        return []
+    endif
+    let min_length= min(map(copy(a:texts), 'len(v:val)'))
+    let prefix= []
+    let i= 0
+    while i < min_length
+        let head= a:texts[0][i]
+        for text in a:texts
+            if text[i] !=# head
+                return prefix
+            endif
+        endfor
+        let prefix+= [a:texts[0][i]]
+        let i+= 1
+    endwhile
+    return prefix
+endfunction
+
 function! s:split_by_common_head(texts)
     if empty(a:texts)
         return []
@@ -210,11 +229,11 @@ function! s:split_by_common_head(texts)
 
     let texts= sort(copy(a:texts))
 
-    let prefix= strpart(texts[0], 0, 1)
+    let prefix= texts[0][0]
     let splitten= []
     let buffer= []
     for text in texts
-        let c= strpart(text, 0, 1)
+        let c= text[0]
         if c ==# prefix
             let buffer+= [text]
         else
