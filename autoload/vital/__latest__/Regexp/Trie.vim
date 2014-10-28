@@ -14,6 +14,10 @@ let s:terminal_key= '__terminal__'
 let s:object= {
 \   '__trie': {},
 \   '__ignorecase': 0,
+\   '__anchor_word_begin': 0,
+\   '__anchor_word_end': 0,
+\   '__anchor_line_begin': 0,
+\   '__anchor_line_end': 0,
 \}
 
 function! s:new()
@@ -53,11 +57,71 @@ function! s:object.ignorecase(...)
     return self
 endfunction
 
+function! s:object.anchor_word(...)
+    if a:0 == 0
+        return self.anchor_word_begin() && self.anchor_word_end()
+    else
+        call self.anchor_word_begin(a:1)
+        call self.anchor_word_end(a:1)
+    endif
+    return self
+endfunction
+
+function! s:object.anchor_word_begin(...)
+    if a:0 == 0
+        return self.__anchor_word_begin
+    else
+        let self.__anchor_word_begin= a:1
+    endif
+    return self
+endfunction
+
+function! s:object.anchor_word_end(...)
+    if a:0 == 0
+        return self.__anchor_word_end
+    else
+        let self.__anchor_word_end= a:1
+    endif
+    return self
+endfunction
+
+function! s:object.anchor_line(...)
+    if a:0 == 0
+        return self.anchor_line_begin() && self.anchor_line_end()
+    else
+        call self.anchor_line_begin(a:1)
+        call self.anchor_line_end(a:1)
+    endif
+    return self
+endfunction
+
+function! s:object.anchor_line_begin(...)
+    if a:0 == 0
+        return self.__anchor_line_begin
+    else
+        let self.__anchor_line_begin= a:1
+    endif
+    return self
+endfunction
+
+function! s:object.anchor_line_end(...)
+    if a:0 == 0
+        return self.__anchor_line_end
+    else
+        let self.__anchor_line_end= a:1
+    endif
+    return self
+endfunction
+
 function! s:object.re()
     return join([
     \   '\m',
     \   (self.ignorecase() ? '\c' : '\C'),
+    \   (self.anchor_line_begin() ? '^' : ''),
+    \   (self.anchor_word_begin() ? '\<' : ''),
     \   s:_regexp(self.__trie),
+    \   (self.anchor_word_end() ? '\>' : ''),
+    \   (self.anchor_line_end() ? '$' : ''),
     \], '')
 endfunction
 

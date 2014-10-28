@@ -50,3 +50,67 @@ function! s:suite.makes_ignorecase_trie()
 
     call s:assert.equals(regexp.re(), '\m\c\%(insert\|select\)')
 endfunction
+
+function! s:suite.__makes_trie_with_anchor__()
+    let anchor_suite= themis#suite('makes trie with')
+
+    function! anchor_suite.anchor_word()
+        let regexp= s:RT.new()
+
+        call regexp.anchor_word(1)
+
+        call regexp.add('hoge')
+
+        call s:assert.equals(regexp.re(), '\m\C\<hoge\>')
+    endfunction
+
+    function! anchor_suite.anchor_word_begin()
+        let regexp= s:RT.new()
+
+        call regexp.anchor_word_begin(1)
+
+        call regexp.add('hoge')
+
+        call s:assert.equals(regexp.re(), '\m\C\<hoge')
+    endfunction
+
+    function! anchor_suite.anchor_word_end()
+        let regexp= s:RT.new()
+
+        call regexp.anchor_word_end(1)
+
+        call regexp.add('hoge')
+
+        call s:assert.equals(regexp.re(), '\m\Choge\>')
+    endfunction
+
+    function! anchor_suite.anchor_line()
+        let regexp= s:RT.new()
+
+        call regexp.anchor_line(1)
+
+        call regexp.add('hoge')
+
+        call s:assert.equals(regexp.re(), '\m\C^hoge$')
+    endfunction
+
+    function! anchor_suite.anchor_line_begin()
+        let regexp= s:RT.new()
+
+        call regexp.anchor_line_begin(1)
+
+        call regexp.add('hoge')
+
+        call s:assert.equals(regexp.re(), '\m\C^hoge')
+    endfunction
+
+    function! anchor_suite.anchor_line_end()
+        let regexp= s:RT.new()
+
+        call regexp.anchor_line_end(1)
+
+        call regexp.add('hoge')
+
+        call s:assert.equals(regexp.re(), '\m\Choge$')
+    endfunction
+endfunction
