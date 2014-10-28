@@ -34,6 +34,7 @@ function! s:object.add(pattern)
     endfor
     " XXX: `ref' never contains this key
     let ref[s:terminal_key]= 1
+    silent! unlet self.__re
     return self
 endfunction
 
@@ -53,6 +54,7 @@ function! s:object.ignorecase(...)
         return self.__ignorecase
     else
         let self.__ignorecase= a:1
+        silent! unlet self.__re
     endif
     return self
 endfunction
@@ -72,6 +74,7 @@ function! s:object.anchor_word_begin(...)
         return self.__anchor_word_begin
     else
         let self.__anchor_word_begin= a:1
+        silent! unlet self.__re
     endif
     return self
 endfunction
@@ -81,6 +84,7 @@ function! s:object.anchor_word_end(...)
         return self.__anchor_word_end
     else
         let self.__anchor_word_end= a:1
+        silent! unlet self.__re
     endif
     return self
 endfunction
@@ -91,6 +95,7 @@ function! s:object.anchor_line(...)
     else
         call self.anchor_line_begin(a:1)
         call self.anchor_line_end(a:1)
+        silent! unlet self.__re
     endif
     return self
 endfunction
@@ -100,6 +105,7 @@ function! s:object.anchor_line_begin(...)
         return self.__anchor_line_begin
     else
         let self.__anchor_line_begin= a:1
+        silent! unlet self.__re
     endif
     return self
 endfunction
@@ -109,12 +115,17 @@ function! s:object.anchor_line_end(...)
         return self.__anchor_line_end
     else
         let self.__anchor_line_end= a:1
+        silent! unlet self.__re
     endif
     return self
 endfunction
 
 function! s:object.re()
-    return join([
+    if has_key(self, '__re')
+        return self.__re
+    endif
+
+    let self.__re= join([
     \   '\m',
     \   (self.ignorecase() ? '\c' : '\C'),
     \   (self.anchor_line_begin() ? '^' : ''),
@@ -123,6 +134,7 @@ function! s:object.re()
     \   (self.anchor_word_end() ? '\>' : ''),
     \   (self.anchor_line_end() ? '$' : ''),
     \], '')
+    return self.__re
 endfunction
 
 function! s:_regexp(trie)
