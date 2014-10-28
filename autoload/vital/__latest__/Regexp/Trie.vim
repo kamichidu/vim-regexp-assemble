@@ -8,9 +8,11 @@ function! s:_vital_depends()
     return []
 endfunction
 
+" XXX: Be careful, this pattern must not be a regex pattern
+let s:terminal_key= '__terminal__'
+
 let s:object= {
 \   '__trie': {},
-\   '__terminators': [],
 \}
 
 function! s:new()
@@ -25,9 +27,8 @@ function! s:object.add(pattern)
         endif
         let ref= ref[char]
     endfor
-    " terminator
-    let self.__terminators+= [ref]
-    let ref[""]= 1
+    " XXX: `ref' never contains this key
+    let ref[s:terminal_key]= 1
     return self
 endfunction
 
@@ -43,12 +44,11 @@ function! s:object.add_file(filename)
 endfunction
 
 function! s:object.re()
-    return '\m\C' . s:_regexp(self.__trie, self.__terminators)
+    return '\m\C' . s:_regexp(self.__trie)
 endfunction
 
-function! s:_regexp(trie, terminators)
-    " if s:_is_terminator(a:trie, a:terminators)
-    if get(a:trie, "", 0) && len(keys(a:trie)) == 1
+function! s:_regexp(trie)
+    if get(a:trie, s:terminal_key, 0) && len(keys(a:trie)) == 1
         return 0
     endif
 
@@ -57,7 +57,7 @@ function! s:_regexp(trie, terminators)
     for char in sort(keys(a:trie))
         let qchar= escape(char, '.')
         if type(a:trie[char]) == type({})
-            let recurse= s:_regexp(a:trie[char], a:terminators)
+            let recurse= s:_regexp(a:trie[char])
             if type(recurse) == type('')
                 let alt+= [qchar . recurse]
             else
@@ -89,15 +89,6 @@ function! s:_regexp(trie, terminators)
         endif
     endif
     return result
-endfunction
-
-function! s:_is_terminator(trie, terminators)
-    for terminator in a:terminators
-        if terminator is a:trie && len(keys(a:trie)) == 1
-            return 1
-        endif
-    endfor
-    return 0
 endfunction
 
 let &cpo= s:save_cpo
