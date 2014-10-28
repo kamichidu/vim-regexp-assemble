@@ -45,7 +45,9 @@ function! s:object.add(...)
     endif
 
     for pattern in patterns
-        call self._add(pattern)
+        if !empty(pattern)
+            call self._add(pattern)
+        endif
     endfor
     return self
 endfunction

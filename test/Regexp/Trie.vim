@@ -227,3 +227,11 @@ function! s:suite.makes_trie_from_file()
 
     call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
 endfunction
+
+function! s:suite.ignores_a_pattern_if_it_is_empty()
+    let regexp= s:RT.new()
+
+    call regexp.add('')
+
+    call s:assert.equals(regexp.re(), '\m\C\%(\)')
+endfunction
