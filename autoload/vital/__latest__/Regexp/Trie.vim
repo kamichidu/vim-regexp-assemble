@@ -45,9 +45,7 @@ function! s:object.add(...)
     endif
 
     for pattern in patterns
-        if !empty(pattern)
-            call self._add(pattern)
-        endif
+        call self._add(pattern)
     endfor
     return self
 endfunction
@@ -144,7 +142,7 @@ function! s:object.re()
     \   (self.ignorecase() ? '\c' : '\C'),
     \   (self.anchor_line_begin() ? '^' : ''),
     \   (self.anchor_word_begin() ? '\<' : ''),
-    \   s:_regexp(self.__trie),
+    \   s:_regexp(self.__trie, 1),
     \   (self.anchor_word_end() ? '\>' : ''),
     \   (self.anchor_line_end() ? '$' : ''),
     \], '')
@@ -168,9 +166,11 @@ function! s:object._add(pattern)
     if has_key(self, '__re') | unlet self.__re | endif
 endfunction
 
-function! s:_regexp(trie)
+function! s:_regexp(trie, ...)
+    let wanted_empty_regexp= get(a:000, 0, 0)
+
     if get(a:trie, s:terminal_key, 0) && len(keys(a:trie)) == 1
-        return 0
+        return wanted_empty_regexp ? '\%(\)' : 0
     endif
 
     let [alt, cc]= [[], []]

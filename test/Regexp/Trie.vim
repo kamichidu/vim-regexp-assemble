@@ -27,6 +27,14 @@ function! s:suite.makes_trie()
     \       'pat': ['[abcd]', '\.', 'a*', '^~$'],
     \       're':  '\m\C\%(\[abcd]\|\\\.\|\^\~\$\|a\*\)',
     \   },
+    \   {
+    \       'pat': [10, 0],
+    \       're':  '\m\C\%(10\|0\)',
+    \   },
+    \   {
+    \       'pat': [''],
+    \       're':  '\m\C\%(\)',
+    \   },
     \]
 
     for data in data_set
