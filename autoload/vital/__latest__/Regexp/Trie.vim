@@ -55,7 +55,8 @@ function! s:_regexp(trie)
     let [alt, cc]= [[], []]
     let q= 0
     for char in sort(keys(a:trie))
-        let qchar= escape(char, '.')
+        " escape regex character when 'magic'
+        let qchar= escape(char, '.\$^~*[')
         if type(a:trie[char]) == type({})
             let recurse= s:_regexp(a:trie[char])
             if type(recurse) == type('')
