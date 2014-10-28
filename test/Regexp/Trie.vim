@@ -131,3 +131,23 @@ function! s:suite.makes_a_clone_of_itself()
     call s:assert.equals(orig.re(), '\m\C\<hoge')
     call s:assert.equals(clone.re(), '\m\Choge')
 endfunction
+
+function! s:suite.__add_func__()
+    let add_func_suite= themis#suite('can add patterns by')
+
+    function! add_func_suite.variadic_strings()
+        let regexp= s:RT.new()
+
+        call regexp.add('foo', 'bar', 'baz')
+
+        call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
+    endfunction
+
+    function! add_func_suite.list()
+        let regexp= s:RT.new()
+
+        call regexp.add(['foo', 'bar', 'baz'])
+
+        call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
+    endfunction
+endfunction

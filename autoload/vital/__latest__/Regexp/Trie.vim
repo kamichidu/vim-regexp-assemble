@@ -24,17 +24,20 @@ function! s:new()
     return deepcopy(s:object)
 endfunction
 
-function! s:object.add(pattern)
-    let ref= self.__trie
-    for char in split(a:pattern, '\zs')
-        if !has_key(ref, char)
-            let ref[char]= {}
-        endif
-        let ref= ref[char]
+function! s:object.add(...)
+    if a:0 == 0
+        throw 'vital: Regexp.Trie: Arguments are required'
+    endif
+
+    if type(a:1) == type([])
+        let patterns= a:1
+    else
+        let patterns= a:000
+    endif
+
+    for pattern in patterns
+        call self._add(pattern)
     endfor
-    " XXX: `ref' never contains this key
-    let ref[s:terminal_key]= 1
-    silent! unlet self.__re
     return self
 endfunction
 
@@ -139,6 +142,19 @@ endfunction
 
 function! s:object.clone()
     return deepcopy(self)
+endfunction
+
+function! s:object._add(pattern)
+    let ref= self.__trie
+    for char in split(a:pattern, '\zs')
+        if !has_key(ref, char)
+            let ref[char]= {}
+        endif
+        let ref= ref[char]
+    endfor
+    " XXX: `ref' never contains this key
+    let ref[s:terminal_key]= 1
+    silent! unlet self.__re
 endfunction
 
 function! s:_regexp(trie)
