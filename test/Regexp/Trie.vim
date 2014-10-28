@@ -114,3 +114,20 @@ function! s:suite.__makes_trie_with_anchor__()
         call s:assert.equals(regexp.re(), '\m\Choge$')
     endfunction
 endfunction
+
+function! s:suite.makes_a_clone_of_itself()
+    let orig= s:RT.new()
+
+    call orig.add('hoge')
+
+    let clone= orig.clone()
+
+    call s:assert.equals(clone.re(), orig.re())
+
+    call orig.anchor_word_begin(1)
+
+    call s:assert.not_equals(clone.anchor_word_begin(), orig.anchor_word_begin())
+
+    call s:assert.equals(orig.re(), '\m\C\<hoge')
+    call s:assert.equals(clone.re(), '\m\Choge')
+endfunction

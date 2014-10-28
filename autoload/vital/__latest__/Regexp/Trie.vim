@@ -137,6 +137,10 @@ function! s:object.re()
     return self.__re
 endfunction
 
+function! s:object.clone()
+    return deepcopy(self)
+endfunction
+
 function! s:_regexp(trie)
     if get(a:trie, s:terminal_key, 0) && len(keys(a:trie)) == 1
         return 0
