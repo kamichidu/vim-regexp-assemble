@@ -20,8 +20,17 @@ let s:object= {
 \   '__anchor_line_end': 0,
 \}
 
-function! s:new()
-    return deepcopy(s:object)
+function! s:new(...)
+    let opts= deepcopy(get(a:000, 0, {}))
+    let object= deepcopy(s:object)
+
+    for opt in keys(opts)
+        if has_key(object, opt) && type(object[opt]) == type(function('tr'))
+            call object[opt](opts[opt])
+        endif
+    endfor
+
+    return object
 endfunction
 
 function! s:object.add(...)
