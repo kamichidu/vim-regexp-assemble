@@ -13,6 +13,7 @@ let s:terminal_key= '__terminal__'
 
 let s:object= {
 \   '__trie': {},
+\   '__ignorecase': 0,
 \}
 
 function! s:new()
@@ -43,8 +44,21 @@ function! s:object.add_file(filename)
     return self
 endfunction
 
+function! s:object.ignorecase(...)
+    if a:0 == 0
+        return self.__ignorecase
+    else
+        let self.__ignorecase= a:1
+    endif
+    return self
+endfunction
+
 function! s:object.re()
-    return '\m\C' . s:_regexp(self.__trie)
+    return join([
+    \   '\m',
+    \   (self.ignorecase() ? '\c' : '\C'),
+    \   s:_regexp(self.__trie),
+    \], '')
 endfunction
 
 function! s:_regexp(trie)

@@ -39,3 +39,14 @@ function! s:suite.makes_trie()
         call s:assert.equals(regexp.re(), data.re)
     endfor
 endfunction
+
+function! s:suite.makes_ignorecase_trie()
+    let regexp= s:RT.new()
+
+    call regexp.ignorecase(1)
+
+    call regexp.add('insert')
+    call regexp.add('select')
+
+    call s:assert.equals(regexp.re(), '\m\c\%(insert\|select\)')
+endfunction
