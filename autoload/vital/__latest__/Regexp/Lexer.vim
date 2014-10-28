@@ -52,6 +52,7 @@ let s:atom= join([
 \   '\\%\d\+v',
 \], '\|')
 let s:char= join([
+\   '\\\\',
 \   '\\i',
 \   '\\I',
 \   '\\k',
@@ -135,6 +136,8 @@ function! s:tokenize(pattern)
                     endif
                 elseif next_token =~# '\m\\%\?('
                     let nest+= 1
+                elseif empty(next_token)
+                    throw 'vital: Regexp.Lexer: Detected unbalanced parentheses.'
                 endif
                 let token.= next_token
             endwhile

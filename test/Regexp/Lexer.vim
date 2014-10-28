@@ -1,5 +1,6 @@
 let s:suite= themis#suite('Regexp.Lexer')
 let s:assert= themis#helper('assert')
+call themis#helper('command')
 
 function! s:suite.before_each()
     let s:RL= vital#of('vital').import('Regexp.Lexer')
@@ -38,10 +39,23 @@ function! s:suite.__tokenize__()
         \       'pattern':   'fun\%[ction]',
         \       'tokenized': ['f', 'u', 'n', '\%[ction]'],
         \   },
+        \   {
+        \       'pattern':   '\\\%(\w\+\|\d*\)',
+        \       'tokenized': ['\\', '\%(\w\+\|\d*\)'],
+        \   },
+        \   {
+        \       'pattern':   '^\w\+\|\d*$',
+        \       'tokenized': ['^', '\w\+', '\|', '\d*', '$'],
+        \   },
         \]
 
         for data in data_set
             call s:assert.equals(s:RL.tokenize(data.pattern), data.tokenized)
         endfor
+    endfunction
+
+    function! tokenize_suite.unbalanced_parentheses()
+        let RL= s:RL
+        Throws /^vital: Regexp\.Lexer:/ RL.tokenize('\%(hoge')
     endfunction
 endfunction
