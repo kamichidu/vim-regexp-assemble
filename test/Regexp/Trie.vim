@@ -219,3 +219,11 @@ function! s:suite.__constructs_with_options__()
         call s:assert.false(regexp.ignorecase())
     endfunction
 endfunction
+
+function! s:suite.makes_trie_from_file()
+    let regexp= s:RT.new()
+
+    call regexp.add_file('./test/Regexp/keywords.txt')
+
+    call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
+endfunction
