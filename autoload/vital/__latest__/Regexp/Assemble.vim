@@ -14,6 +14,7 @@ let s:terminal_key= '__terminal__'
 
 let s:object= {
 \   '__path': [],
+\   '__debug': 1,
 \}
 
 function! s:new()
@@ -127,8 +128,10 @@ function! s:_add(self, path, tokens)
             let node[token]= [token] + tokens
             let node[s:terminal_key]= 1
             call s:L.push(path, node)
+            if a:self.__debug | echo '# added remaining' s:_dump(path) | endif
             break
         elseif token !=# path[offset]
+            if a:self.__debug | echo '# token' token 'not present' | endif
             let node= {}
             if token !=# ''
                 let node[a:self._node_key()]= [token] + tokens
@@ -136,15 +139,20 @@ function! s:_add(self, path, tokens)
                 let node[s:terminal_key]= 1
             endif
             let path= s:_splice(path, offset, len(path) - offset, node)
+            if a:self.__debug | echo '# path=' s:_dump(path) | endif
             break
         elseif !empty(tokens)
+            if a:self.__debug | echo '# last token to add' | endif
             if offset + 1 < len(path)
                 let offset+= 1
                 if type(path[offset]) == type({})
-                    let node= {}
+                    if a:self.__debug | echo '# add sentinel to node' | endif
+                    let node= path[offset]
+                    echo '# node' node
                     let node[s:terminal_key]= 1
                     let path[offset]= node
                 else
+                    if a:self.__debug | echo '# convert <' path[offset] '> to node for sentinel' | endif
                     let node= {}
                     let node[path[offset]]= path[offset : (len(path) - 1)]
                     let node[s:terminal_key]= 1
@@ -160,7 +168,8 @@ function! s:_add(self, path, tokens)
 endfunction
 
 function! s:_splice(list, from, to, val)
-    let [left, right]= [a:list[ : a:from], a:list[a:to : ]]
+    let left= a:from > 0 ? a:list[ : a:from - 1] : []
+    let right= a:list[a:to + 1 : ]
     return left + [a:val] + right
 endfunction
 
