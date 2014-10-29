@@ -44,7 +44,7 @@ function! s:suite.makes_trie()
             call regexp.add(pat)
         endfor
 
-        call s:assert.equals(regexp.re(), data.re)
+        call s:assert.same(regexp.re(), data.re)
     endfor
 endfunction
 
@@ -56,7 +56,7 @@ function! s:suite.makes_ignorecase_trie()
     call regexp.add('insert')
     call regexp.add('select')
 
-    call s:assert.equals(regexp.re(), '\m\c\%(insert\|select\)')
+    call s:assert.same(regexp.re(), '\m\c\%(insert\|select\)')
 endfunction
 
 function! s:suite.__makes_trie_with_anchor__()
@@ -69,7 +69,7 @@ function! s:suite.__makes_trie_with_anchor__()
 
         call regexp.add('hoge')
 
-        call s:assert.equals(regexp.re(), '\m\C\<hoge\>')
+        call s:assert.same(regexp.re(), '\m\C\<hoge\>')
     endfunction
 
     function! anchor_suite.anchor_word_begin()
@@ -79,7 +79,7 @@ function! s:suite.__makes_trie_with_anchor__()
 
         call regexp.add('hoge')
 
-        call s:assert.equals(regexp.re(), '\m\C\<hoge')
+        call s:assert.same(regexp.re(), '\m\C\<hoge')
     endfunction
 
     function! anchor_suite.anchor_word_end()
@@ -89,7 +89,7 @@ function! s:suite.__makes_trie_with_anchor__()
 
         call regexp.add('hoge')
 
-        call s:assert.equals(regexp.re(), '\m\Choge\>')
+        call s:assert.same(regexp.re(), '\m\Choge\>')
     endfunction
 
     function! anchor_suite.anchor_line()
@@ -99,7 +99,7 @@ function! s:suite.__makes_trie_with_anchor__()
 
         call regexp.add('hoge')
 
-        call s:assert.equals(regexp.re(), '\m\C^hoge$')
+        call s:assert.same(regexp.re(), '\m\C^hoge$')
     endfunction
 
     function! anchor_suite.anchor_line_begin()
@@ -109,7 +109,7 @@ function! s:suite.__makes_trie_with_anchor__()
 
         call regexp.add('hoge')
 
-        call s:assert.equals(regexp.re(), '\m\C^hoge')
+        call s:assert.same(regexp.re(), '\m\C^hoge')
     endfunction
 
     function! anchor_suite.anchor_line_end()
@@ -119,7 +119,7 @@ function! s:suite.__makes_trie_with_anchor__()
 
         call regexp.add('hoge')
 
-        call s:assert.equals(regexp.re(), '\m\Choge$')
+        call s:assert.same(regexp.re(), '\m\Choge$')
     endfunction
 endfunction
 
@@ -130,14 +130,14 @@ function! s:suite.makes_a_clone_of_itself()
 
     let clone= orig.clone()
 
-    call s:assert.equals(clone.re(), orig.re())
+    call s:assert.same(clone.re(), orig.re())
 
     call orig.anchor_word_begin(1)
 
     call s:assert.not_equals(clone.anchor_word_begin(), orig.anchor_word_begin())
 
-    call s:assert.equals(orig.re(), '\m\C\<hoge')
-    call s:assert.equals(clone.re(), '\m\Choge')
+    call s:assert.same(orig.re(), '\m\C\<hoge')
+    call s:assert.same(clone.re(), '\m\Choge')
 endfunction
 
 function! s:suite.__add_func__()
@@ -148,7 +148,7 @@ function! s:suite.__add_func__()
 
         call regexp.add('foo', 'bar', 'baz')
 
-        call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
+        call s:assert.same(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
     endfunction
 
     function! add_func_suite.list()
@@ -156,7 +156,7 @@ function! s:suite.__add_func__()
 
         call regexp.add(['foo', 'bar', 'baz'])
 
-        call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
+        call s:assert.same(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
     endfunction
 endfunction
 
@@ -233,7 +233,7 @@ function! s:suite.makes_trie_from_file()
 
     call regexp.add_file('./test/Regexp/keywords.txt')
 
-    call s:assert.equals(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
+    call s:assert.same(regexp.re(), '\m\C\%(ba[rz]\|foo\)')
 endfunction
 
 function! s:suite.ignores_a_pattern_if_it_is_empty()
@@ -241,5 +241,5 @@ function! s:suite.ignores_a_pattern_if_it_is_empty()
 
     call regexp.add('')
 
-    call s:assert.equals(regexp.re(), '\m\C\%(\)')
+    call s:assert.same(regexp.re(), '\m\C\%(\)')
 endfunction
