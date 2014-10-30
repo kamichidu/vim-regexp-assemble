@@ -15,6 +15,7 @@ let s:terminal_key= '__terminal__'
 let s:object= {
 \   '__path': [],
 \   '__debug': 1,
+\   '__trie': {},
 \}
 
 function! s:new()
@@ -33,8 +34,19 @@ function! s:object.add(...)
     endif
 
     for pattern in patterns
-        let self.__path= s:_add(self, self.__path, s:RL.tokenize(pattern))
+        let ref= self.__trie
+        for atom in s:RL.tokenize(pattern)
+            if !has_key(ref, atom)
+                let ref[atom]= {}
+            endif
+            let ref= ref[atom]
+        endfor
+        let ref[s:terminal_key]= 1
     endfor
+
+    " for pattern in patterns
+    "     let self.__path= s:_add(self, self.__path, s:RL.tokenize(pattern))
+    " endfor
     return self
 endfunction
 
@@ -55,7 +67,7 @@ function! s:object.re()
     let self.__re= join([
     \   '\m',
     \   '\C',
-    \   s:_regexp(self.__path, 1),
+    \   s:_regexp(self.__trie, 1),
     \], '')
     return self.__re
 endfunction
@@ -97,6 +109,7 @@ function! s:_add(self, path, tokens)
             break
         endif
         if type(path[offset]) == type({})
+            echo 'hoge=' path[offset]
             let node= path[offset]
             if has_key(node, token)
                 if offset < len(path) - 1
@@ -115,8 +128,8 @@ function! s:_add(self, path, tokens)
                     let node[token]= [token] + tokens
                 else
                     let new= {}
-                    let new[a:self._node_key(token)]= [token] + tokens
-                    let new[a:self._node_key(node)]= path[offset : (len(path) - 1)]
+                    let new[s:_node_key(a:self, token)]= [token] + tokens
+                    let new[s:_node_key(a:self, node)]= path[offset : (len(path) - 1)]
                     let path= s:_splice(path, offset, len(path) - offset, new)
                 endif
                 break
@@ -134,14 +147,14 @@ function! s:_add(self, path, tokens)
             if a:self.__debug | echo '# token' token 'not present' | endif
             let node= {}
             if token !=# ''
-                let node[a:self._node_key()]= [token] + tokens
+                let node[s:_node_key(a:self, token)]= [token] + tokens
             else
                 let node[s:terminal_key]= 1
             endif
             let path= s:_splice(path, offset, len(path) - offset, node)
-            if a:self.__debug | echo '# path=' s:_dump(path) | endif
+            if a:self.__debug | echo '# path=' path | endif
             break
-        elseif !empty(tokens)
+        elseif empty(tokens)
             if a:self.__debug | echo '# last token to add' | endif
             if offset + 1 < len(path)
                 let offset+= 1
@@ -167,10 +180,59 @@ function! s:_add(self, path, tokens)
     return path
 endfunction
 
+function! s:_node_key(self, node)
+    if type(a:node) == type([])
+        return s:_node_key(a:node[0])
+    endif
+    if type(a:node) != type({})
+        return a:node
+    endif
+
+    let key= ''
+    for k in keys(a:node)
+        if k !=# ''
+            if key ==# '' || key >=# k
+                let key= k
+            endif
+        endif
+    endfor
+    return key
+endfunction
+
 function! s:_splice(list, from, to, val)
     let left= a:from > 0 ? a:list[ : a:from - 1] : []
     let right= a:list[a:to + 1 : ]
     return left + [a:val] + right
+endfunction
+
+function! s:_re_path(self, path)
+    if a:self.unroll_plus()
+        let arr= copy(a:path)
+        let str= ''
+        let skip= 0
+        for i in range(len(arr))
+            if type(arr[i]) == type([])
+                let str.= s:_re_path(a:self, arr[i])
+            elseif type(arr[i]) == type({})
+                $str .= exists $arr[$i]->{''}
+                    ? _combine_new( $self,
+                        map { _re_path( $self, $arr[$i]->{$_} ) } grep { $_ ne '' } keys %{$arr[$i]}
+                    ) . '?'
+                    : _combine_new($self, map { _re_path( $self, $arr[$i]->{$_} ) } keys %{$arr[$i]})
+                ;
+            elseif i < len(arr) - 1 && arr[i + 1] =~ printf('^%s\(\*\|?\)$', arr[i]) /\A$arr[$i]\*(\??)\Z/
+                " * or \? case
+                let str.= printf('%s\+', arr[i])
+                $str .= "$arr[$i]+" . (defined $1 ? $1 : '');
+                let skip+= 1
+            elseif skip
+                let skip= 0
+            else
+                let str.= arr[i]
+            endif
+        endfor
+        return str
+    endif
 endfunction
 
 function! s:_regexp(path, ...)
