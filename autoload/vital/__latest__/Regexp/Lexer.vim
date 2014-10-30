@@ -93,7 +93,6 @@ let s:char= join([
 \   '\\Z',
 \   '\\[mM]',
 \   '\\[vV]',
-\   '\\%=[0-2]',
 \   '\\%d\d\+',
 \   '\\%x\x\+',
 \   '\\%o\o\+',
@@ -112,6 +111,12 @@ function! s:tokenize(pattern)
     let lexer= '\m\C\%(' . s:default_lexer . '\)'
     let p= 0
     let path= []
+
+    if a:pattern =~# '\\%#=[0-2]'
+        let path+= [matchstr(a:pattern, '\\%#=[0-2]')]
+        let p+= 5
+    endif
+
     while 1
         let token= matchstr(a:pattern, lexer, p)
         let token_length= strlen(token)

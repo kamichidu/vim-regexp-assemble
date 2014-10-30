@@ -47,6 +47,10 @@ function! s:suite.__tokenize__()
         \       'pattern':   '^\w\+\|\d*$',
         \       'tokenized': ['^', '\w\+', '\|', '\d*', '$'],
         \   },
+        \   {
+        \       'pattern':   '\%#=0\m\Choge\>',
+        \       'tokenized': ['\%#=0', '\m', '\C', 'h', 'o', 'g', 'e', '\>'],
+        \   },
         \]
 
         for data in data_set
